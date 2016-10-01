@@ -354,6 +354,8 @@ class core_user_external extends external_api {
                             'auth' =>
                                 new external_value(PARAM_PLUGIN, 'Auth plugins include manual, ldap, imap, etc', VALUE_OPTIONAL, '',
                                     NULL_NOT_ALLOWED),
+                            'suspended' =>
+                                new external_value(PARAM_NUMBER, 'Suspend user account, either 0 to enable user login or 1 to disable it', VALUE_OPTIONAL),
                             'idnumber' =>
                                 new external_value(PARAM_RAW, 'An arbitrary ID code number perhaps from the institution',
                                     VALUE_OPTIONAL),
@@ -450,6 +452,10 @@ class core_user_external extends external_api {
                     set_user_preference($preference['type'], $preference['value'], $user['id']);
                 }
             }
+        }
+        //if user was suspended, kill their session
+        if (isset($user['suspended']) and $user['suspended']) {
+            \core\session\manager::kill_user_sessions($user['id']);
         }
 
         $transaction->allow_commit();
@@ -995,6 +1001,7 @@ class core_user_external extends external_api {
             'firstaccess' => new external_value(PARAM_INT, 'first access to the site (0 if never)', VALUE_OPTIONAL),
             'lastaccess'  => new external_value(PARAM_INT, 'last access to the site (0 if never)', VALUE_OPTIONAL),
             'auth'        => new external_value(PARAM_PLUGIN, 'Auth plugins include manual, ldap, imap, etc', VALUE_OPTIONAL),
+            'suspended'   => new external_value(PARAM_NUMBER, 'Suspend user account, either 0 to enable user login or 1 to disable it', VALUE_OPTIONAL),
             'confirmed'   => new external_value(PARAM_INT, 'Active user: 1 if confirmed, 0 otherwise', VALUE_OPTIONAL),
             'lang'        => new external_value(PARAM_SAFEDIR, 'Language code such as "en", must exist on server', VALUE_OPTIONAL),
             'calendartype' => new external_value(PARAM_PLUGIN, 'Calendar type such as "gregorian", must exist on server', VALUE_OPTIONAL),
